@@ -1,0 +1,44 @@
+import { createCustomerXTheme } from './createCustomerXTheme';
+import { dark, light } from './modes';
+
+describe('createCustomerXTheme', () => {
+  it.each([
+    ['light', light],
+    ['dark', dark],
+  ])('builds a v4 and v5 theme for %s mode', (_name, mode) => {
+    // Throws if any component override is undefined or a default style
+    // function is invoked with a bad theme (both bit us at runtime only).
+    const theme = createCustomerXTheme(mode);
+    const v4 = theme.getTheme('v4') as any;
+    const v5 = theme.getTheme('v5') as any;
+
+    expect(v4).toBeDefined();
+    expect(v5).toBeDefined();
+    expect(v4.palette.type).toBe(mode.mode);
+    expect(v5.palette.mode).toBe(mode.mode);
+    expect(v4.shape.borderRadius).toBe(8);
+    expect(v5.shape.borderRadius).toBe(8);
+  });
+
+  it('exposes overrides for the components plugins use', () => {
+    const v4 = createCustomerXTheme(light).getTheme('v4') as any;
+    for (const key of [
+      'MuiCard',
+      'MuiCardActionArea',
+      'MuiButton',
+      'MuiChip',
+      'BackstageHeader',
+    ]) {
+      expect(v4.overrides[key]).toBeDefined();
+    }
+    expect(v4.props.MuiTextField).toEqual({ variant: 'outlined' });
+  });
+
+  it('emits @backstage/ui variables from the same tokens', () => {
+    const v4 = createCustomerXTheme(dark).getTheme('v4') as any;
+    const globals = v4.overrides.MuiCssBaseline['@global'];
+    const sel = "[data-theme-name='customer-x'][data-theme-mode='dark']";
+    expect(globals[sel]['--bui-accent-bg']).toBe(dark.primary.main);
+    expect(globals[sel]['--bui-bg-app']).toBe(dark.n.bg);
+  });
+});

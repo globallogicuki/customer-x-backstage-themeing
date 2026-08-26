@@ -6,8 +6,16 @@ import techInsightsOverviewPlugin from '@globallogicuki/backstage-plugin-tech-in
 import skillsMarketplacePlugin from '@globallogicuki/backstage-plugin-skills-marketplace/alpha';
 import terraformPlugin from '@globallogicuki/backstage-plugin-terraform/alpha';
 import unleashPlugin from '@globallogicuki/backstage-plugin-unleash/alpha';
-import { navModule } from './modules/nav';
-import { homeModule } from './modules/home';
+import { customerXFeatures } from './modules/customer-x';
+// Default (scaffolded) sidebar. Not registered while the CustomerX nav is
+// active — both provide `nav-content:app`, so only one may be enabled at a
+// time. To switch back: add `navModule` to `features` and remove the CustomerX
+// nav from `customerXFeatures` (or set `nav-content:app: false` in app-config
+// to fall back to Backstage's built-in sidebar instead).
+// import { navModule } from './modules/nav';
+// Default (scaffolded) home-page widget. Inert while `page:home: false` is set
+// in app-config; re-enable that page and register `homeModule` to restore it.
+// import { homeModule } from './modules/home';
 
 export default createApp({
   features: [
@@ -17,7 +25,6 @@ export default createApp({
     techInsightsPlugin,
     terraformPlugin,
     unleashPlugin,
-    navModule,
-    homeModule,
+    ...customerXFeatures,
   ],
 });
