@@ -1352,6 +1352,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@axe-core/playwright@npm:^4.13.0":
+  version: 4.13.0
+  resolution: "@axe-core/playwright@npm:4.13.0"
+  dependencies:
+    axe-core: "npm:~4.13.0"
+  peerDependencies:
+    playwright-core: ">= 1.0.0"
+  checksum: 10c0/0938f24f3955bfa11c77c326300646a4f1dcd513389320ace9985d68486a622c443b2a34cd86f6002f617a3395623ad1e99a622450830873166aaa7e0312aa68
+  languageName: node
+  linkType: hard
+
 "@azure/abort-controller@npm:^2.0.0, @azure/abort-controller@npm:^2.1.2":
   version: 2.1.2
   resolution: "@azure/abort-controller@npm:2.1.2"
@@ -6469,10 +6480,15 @@ __metadata:
     "@backstage/frontend-plugin-api": "npm:^0.18.0"
     "@backstage/plugin-app-react": "npm:^0.2.6"
     "@backstage/plugin-catalog-react": "npm:^3.2.1"
+    "@backstage/plugin-home": "npm:^0.9.9"
     "@backstage/plugin-search": "npm:^1.7.7"
+    "@backstage/plugin-search-common": "npm:^1.2.24"
+    "@backstage/plugin-search-react": "npm:^1.11.7"
+    "@backstage/plugin-techdocs-react": "npm:^1.3.14"
     "@backstage/theme": "npm:^0.7.3"
     "@material-ui/core": "npm:^4.12.2"
     "@material-ui/icons": "npm:^4.9.1"
+    esbuild: "npm:0.28.2"
     react: "npm:^18.0.2"
     react-router-dom: "npm:^6.30.2"
     react-use: "npm:^17.2.4"
@@ -16040,6 +16056,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axe-core@npm:~4.13.0":
+  version: 4.13.0
+  resolution: "axe-core@npm:4.13.0"
+  checksum: 10c0/0e3be8be10eea64beddefd3007e1425424ff60c26c5f4d5f748ec48c2825356839c02ad4167fc1f03a6d84ecd82108f49fb2846ab7fe949273787391745561ca
+  languageName: node
+  linkType: hard
+
 "axios-cached-dns-resolve@npm:0.5.2":
   version: 0.5.2
   resolution: "axios-cached-dns-resolve@npm:0.5.2"
@@ -19850,7 +19873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.28.1":
+"esbuild@npm:0.28.2, esbuild@npm:^0.28.1":
   version: 0.28.2
   resolution: "esbuild@npm:0.28.2"
   dependencies:
@@ -31592,6 +31615,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root@workspace:."
   dependencies:
+    "@axe-core/playwright": "npm:^4.13.0"
     "@backstage/cli": "npm:^0.36.5"
     "@backstage/cli-defaults": "npm:^0.1.5"
     "@backstage/e2e-test-utils": "npm:^0.1.2"

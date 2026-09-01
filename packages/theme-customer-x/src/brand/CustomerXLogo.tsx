@@ -1,4 +1,5 @@
 import { makeStyles } from '@material-ui/core';
+import { cx } from '../cx';
 import { fontFamily } from '../tokens';
 import { CustomerXMark } from './CustomerXMark';
 
@@ -7,23 +8,25 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     gap: 12,
-    whiteSpace: 'nowrap',
     lineHeight: 1.15,
   },
   text: { display: 'flex', flexDirection: 'column', minWidth: 0 },
+  // Sentence case, tight: "Accelerate" is a product name, not an acronym, and
+  // the mark beside it already supplies the forward motion.
   wordmark: {
     fontFamily,
-    fontWeight: 700,
-    fontSize: 15,
-    letterSpacing: '0.14em',
-    textTransform: 'uppercase',
+    fontWeight: 600,
+    fontSize: 17,
+    letterSpacing: '-0.02em',
+    whiteSpace: 'nowrap',
   },
+  // Wraps rather than truncates: the full team name is the point of it.
   tagline: {
     fontSize: 11,
     fontWeight: 500,
-    opacity: 0.62,
-    marginTop: 3,
-    whiteSpace: 'nowrap',
+    opacity: 0.66,
+    marginTop: 2,
+    lineHeight: 1.3,
   },
 });
 
@@ -37,7 +40,7 @@ export interface CustomerXLogoProps {
   className?: string;
 }
 
-/** Mark + "CUSTOMER_X" wordmark. Used in the nav rail and on the sign-in page. */
+/** Mark + "Accelerate" wordmark. Used in the nav rail and on the sign-in page. */
 export const CustomerXLogo = ({
   size = 30,
   tagline,
@@ -46,13 +49,10 @@ export const CustomerXLogo = ({
 }: CustomerXLogoProps) => {
   const classes = useStyles();
   return (
-    <span
-      className={[classes.root, className].filter(Boolean).join(' ')}
-      style={{ color }}
-    >
+    <span className={cx(classes.root, className)} style={{ color }}>
       <CustomerXMark size={size} />
       <span className={classes.text}>
-        <span className={classes.wordmark}>CustomerX</span>
+        <span className={classes.wordmark}>Accelerate</span>
         {tagline && <span className={classes.tagline}>{tagline}</span>}
       </span>
     </span>

@@ -5,6 +5,9 @@ import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
 import { useNavigate } from 'react-router-dom';
 import { CustomerXMark } from '../brand';
+import { SurfaceCard } from '../components';
+import { tokensFor } from '../theme/modes';
+import { font } from '../tokens';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -16,36 +19,32 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.default,
   },
   panel: {
-    maxWidth: 560,
+    maxWidth: 520,
     width: '100%',
-    padding: '40px 40px 36px',
-    borderRadius: 16,
-    background: theme.palette.background.paper,
-    border: `1px solid ${theme.palette.divider}`,
+    padding: 32,
   },
   eyebrow: {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
     marginBottom: 20,
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    color: theme.palette.infoText,
+    fontSize: font.base,
+    fontWeight: 500,
+    color: tokensFor(theme).accentText,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 700,
+    fontSize: font.xxl,
+    fontWeight: 600,
     letterSpacing: '-0.02em',
     lineHeight: 1.2,
-    marginBottom: 10,
+    marginBottom: 8,
+    color: tokensFor(theme).heading,
   },
   copy: {
-    fontSize: 15,
+    fontSize: font.md,
     lineHeight: 1.6,
     color: theme.palette.text.secondary,
-    marginBottom: 28,
+    marginBottom: 24,
   },
   actions: {
     display: 'flex',
@@ -55,7 +54,7 @@ const useStyles = makeStyles(theme => ({
   },
   support: {
     marginLeft: 'auto',
-    fontSize: 13.5,
+    fontSize: font.base,
     fontWeight: 500,
   },
 }));
@@ -71,7 +70,11 @@ export const CustomerXNotFoundPage = (_props: NotFoundErrorPageProps) => {
 
   return (
     <main className={classes.root}>
-      <section className={classes.panel} aria-labelledby="not-found-title">
+      <SurfaceCard
+        component="section"
+        className={classes.panel}
+        aria-labelledby="not-found-title"
+      >
         <div className={classes.eyebrow}>
           <CustomerXMark size={28} />
           <span>Error 404 · Page not found</span>
@@ -110,7 +113,7 @@ export const CustomerXNotFoundPage = (_props: NotFoundErrorPageProps) => {
             </Link>
           )}
         </div>
-      </section>
+      </SurfaceCard>
     </main>
   );
 };

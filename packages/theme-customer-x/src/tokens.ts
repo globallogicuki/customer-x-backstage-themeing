@@ -6,11 +6,23 @@
  * and neutrals are derived to give the portal a flat, modern SaaS feel while
  * keeping WCAG AA contrast for text and controls.
  */
+/**
+ * `rgba()` from one of the hex tokens below. Keeps alpha tints (overlays, the
+ * nav rail's white "glass" layers) free of hand-typed colour triples.
+ */
+export const rgba = (hex: string, a: number) =>
+  `rgba(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(
+    hex.slice(3, 5),
+    16,
+  )}, ${parseInt(hex.slice(5, 7), 16)}, ${a})`;
+
 export const brand = {
   /** Signature process cyan. */
   cyan: '#00AEEF',
   cyanLight: '#5CCBF5',
   cyanDark: '#0092C9',
+  /** Palest cyan — accent text and hover states on dark surfaces. */
+  cyanPale: '#8FDDF9',
   /** Accessible cyan for text/links on white (AA). */
   cyanText: '#0076B6',
   /** Navy anchor. */
@@ -20,12 +32,12 @@ export const brand = {
   navyDeep: '#001F33',
   /** Tints. */
   sky: '#E5F6FD',
-  skyDark: 'rgba(0, 174, 239, 0.12)',
   white: '#FFFFFF',
 } as const;
 
 export const neutralsLight = {
-  bg: '#F4F7FA',
+  /** Canvas — a breath of the brand cyan in the grey so white cards lift off it. */
+  bg: '#EEF5FA',
   paper: '#FFFFFF',
   paperMuted: '#F8FAFC',
   border: '#E3E8EE',
@@ -86,16 +98,38 @@ export const radius = {
   pill: 999,
 } as const;
 
+/**
+ * The type scale. Every size in the portal is one of these — no half-pixel
+ * one-offs — so headings, labels and body text stay on a shared rhythm.
+ *
+ * `xs`/`sm` are label sizes, `base` is dense body (table meta, card blurbs),
+ * `md` is body, and `lg` upwards are headings.
+ */
+export const font = {
+  xs: 11,
+  sm: 12,
+  base: 13,
+  md: 14,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  display: 32,
+} as const;
+
+/**
+ * Spacing step. All padding, margin and gap values are multiples of this, so
+ * surfaces line up across components that were written months apart.
+ */
+export const space = (steps: number) => steps * 4;
+
 export const shadow = {
   light: {
-    xs: '0 1px 2px rgba(11, 31, 51, 0.05)',
     sm: '0 1px 3px rgba(11, 31, 51, 0.08), 0 1px 2px rgba(11, 31, 51, 0.04)',
     md: '0 4px 12px rgba(11, 31, 51, 0.08), 0 1px 3px rgba(11, 31, 51, 0.05)',
     lg: '0 12px 32px rgba(11, 31, 51, 0.14), 0 2px 6px rgba(11, 31, 51, 0.06)',
     ring: '0 0 0 3px rgba(0, 174, 239, 0.28)',
   },
   dark: {
-    xs: '0 1px 2px rgba(0, 0, 0, 0.3)',
     sm: '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3)',
     md: '0 4px 12px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3)',
     lg: '0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35)',
@@ -103,9 +137,14 @@ export const shadow = {
   },
 } as const;
 
-/** Shared hover behaviour for clickable cards (SurfaceCard and themed MuiCard). */
+/**
+ * Shared hover behaviour for clickable cards (SurfaceCard and themed MuiCard).
+ *
+ * Hover shifts the border and the fill — it does not lift the card. A card
+ * that jumps towards the cursor reads as Material-era; holding position and
+ * changing weight is what a dense, information-first product wants.
+ */
 export const interactive = {
   transition:
-    'transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease',
-  transform: 'translateY(-2px)',
+    'background-color 120ms ease, border-color 120ms ease, color 120ms ease',
 } as const;

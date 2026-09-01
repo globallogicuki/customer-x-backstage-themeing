@@ -1,6 +1,6 @@
 {
-  "short_name": "Backstage",
-  "name": "Backstage",
+  "short_name": "Accelerate",
+  "name": "Accelerate \u2014 CustomerX Developer Platform",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,6 @@
   ],
   "start_url": "./index.html",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#00395D",
+  "background_color": "#EEF5FA"
 }

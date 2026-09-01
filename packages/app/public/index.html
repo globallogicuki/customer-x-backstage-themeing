@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#00395D" />
     <meta
       name="description"
-      content="CustomerX Developer Platform — catalogue, scorecards, templates and docs for engineering teams"
+      content="Accelerate — the CustomerX engineering home: catalogue, scorecards, templates and docs"
     />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -48,14 +48,17 @@
     />
     <!--
       Typeface: CustomerX's corporate face (Expert Sans) is licensed and is picked
-      up automatically when self-hosted. Inter is the open fallback.
+      up automatically when self-hosted. Inter is the open fallback, self-hosted
+      from /fonts so the portal makes no third-party requests for type.
     -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="<%= publicPath %>/fonts/Inter-400-700-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
+    <link rel="stylesheet" href="<%= publicPath %>/fonts.css" />
     <title><%= config.getOptionalString('app.title') ?? 'Backstage' %></title>
   </head>
   <body>

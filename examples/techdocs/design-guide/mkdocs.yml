@@ -1,0 +1,10 @@
+site_name: Accelerate design guide
+site_description: How Accelerate looks, speaks and is built
+nav:
+  - Overview: index.md
+  - Colour: colour.md
+  - Type & layout: type.md
+  - Components: components.md
+  - Voice: voice.md
+plugins:
+  - techdocs-core

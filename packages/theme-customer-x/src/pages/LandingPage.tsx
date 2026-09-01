@@ -1,11 +1,15 @@
 import { Link } from '@backstage/core-components';
-import { identityApiRef, useApi } from '@backstage/core-plugin-api';
+import { useApi, useApiHolder } from '@backstage/core-plugin-api';
+import { visitsApiRef, type Visit } from '@backstage/plugin-home';
 import {
   catalogApiRef,
   EntityRefLink,
   useStarredEntities,
 } from '@backstage/plugin-catalog-react';
 import { type Entity, parseEntityRef } from '@backstage/catalog-model';
+import { useSearchModal } from '@backstage/plugin-search';
+import { CustomerXSearchModal } from '../search';
+import { useCurrentUser } from '../useCurrentUser';
 import {
   ActionCard,
   HeroBanner,
@@ -13,24 +17,26 @@ import {
   PanelCard,
   Pill,
   SectionHeading,
+  Skeleton,
   StatTile,
 } from '../components';
 import { Grid, makeStyles } from '@material-ui/core';
+import { tokensFor } from '../theme/modes';
 import AccountTreeRoundedIcon from '@material-ui/icons/AccountTreeRounded';
 import AddCircleOutlineRoundedIcon from '@material-ui/icons/AddCircleOutlineRounded';
 import AssessmentRoundedIcon from '@material-ui/icons/AssessmentRounded';
-import CodeRoundedIcon from '@material-ui/icons/CodeRounded';
 import DescriptionRoundedIcon from '@material-ui/icons/DescriptionRounded';
 import ExtensionRoundedIcon from '@material-ui/icons/ExtensionRounded';
 import FlagRoundedIcon from '@material-ui/icons/FlagRounded';
-import LayersRoundedIcon from '@material-ui/icons/LayersRounded';
+import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
+import PersonOffRoundedIcon from '@material-ui/icons/PersonOutlineRounded';
 import SearchRoundedIcon from '@material-ui/icons/SearchRounded';
 import StarRoundedIcon from '@material-ui/icons/StarRounded';
 import StorefrontRoundedIcon from '@material-ui/icons/StorefrontRounded';
 import WidgetsRoundedIcon from '@material-ui/icons/WidgetsRounded';
-import { FormEvent, ReactNode, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 import useAsync from 'react-use/esm/useAsync';
+import { brand, font, radius, rgba } from '../tokens';
 
 // Page-specific chrome only; every card is a design-system primitive.
 const useStyles = makeStyles(theme => ({
@@ -38,65 +44,91 @@ const useStyles = makeStyles(theme => ({
     minHeight: '100%',
     backgroundColor: theme.palette.background.default,
   },
+  // The one element in the hero allowed to be big. Everything a person comes
+  // here to do starts with finding something, so finding something is the
+  // page's opening move. A white card on the Dark Blue; it opens the same
+  // ⌘K modal as the rail so there is one search, not two.
   search: {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
-    maxWidth: 720,
+    width: '100%',
+    maxWidth: 680,
     height: 56,
-    padding: '0 8px 0 18px',
-    borderRadius: 14,
+    padding: '0 18px',
+    boxSizing: 'border-box',
+    borderRadius: radius.lg,
+    border: 'none',
     background: theme.palette.background.paper,
-    boxShadow: '0 18px 44px rgba(0, 20, 40, 0.35)',
-    '& svg': { color: theme.palette.text.secondary, flexShrink: 0 },
-    '&:focus-within': {
-      boxShadow: `0 18px 44px rgba(0, 20, 40, 0.35), 0 0 0 3px ${theme.palette.secondary.main}73`,
+    boxShadow: tokensFor(theme).shadows.lg,
+    color: theme.palette.text.secondary,
+    font: 'inherit',
+    fontSize: font.lg,
+    textAlign: 'left',
+    cursor: 'pointer',
+    transition: 'box-shadow 120ms ease',
+    '& svg': { color: theme.palette.secondary.main, flexShrink: 0 },
+    '&:hover, &:focus-visible': {
+      outline: 'none',
+      boxShadow: `${tokensFor(theme).shadows.lg}, 0 0 0 3px ${brand.cyan}`,
     },
   },
-  searchInput: {
-    flex: 1,
-    height: '100%',
-    border: 'none',
-    outline: 'none',
-    background: 'transparent',
-    font: 'inherit',
-    fontSize: 16,
-    color: theme.palette.text.primary,
-    '&::placeholder': { color: theme.palette.text.disabled },
+  searchLabel: { flex: 1 },
+  kbd: {
+    fontFamily: 'inherit',
+    fontSize: font.sm,
+    fontWeight: 500,
+    // Secondary, not disabled: it's a hint people read (AA at 12px).
+    color: theme.palette.text.secondary,
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: radius.sm,
+    padding: '3px 6px',
+    lineHeight: 1,
   },
-  searchButton: {
-    height: 40,
-    padding: '0 18px',
-    borderRadius: 10,
-    border: 'none',
-    background: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    font: 'inherit',
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-    '&:hover': { background: theme.palette.primary.dark },
-  },
-  chips: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 },
+  chips: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 },
   chip: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 6,
     height: 32,
     padding: '0 14px',
-    borderRadius: 999,
-    border: '1px solid rgba(255,255,255,0.18)',
-    background: 'rgba(255,255,255,0.08)',
-    color: 'inherit',
-    fontSize: 13,
+    borderRadius: radius.pill,
+    border: `1px solid ${rgba(brand.white, 0.18)}`,
+    background: rgba(brand.white, 0.08),
+    color: brand.white,
+    fontSize: font.base,
     fontWeight: 500,
     textDecoration: 'none',
-    transition: 'background-color 120ms ease',
-    '&:hover': { background: 'rgba(255,255,255,0.16)' },
-    '& svg': { width: 16, height: 16 },
+    transition: 'background-color 120ms ease, border-color 120ms ease',
+    '&:hover': {
+      background: rgba(brand.white, 0.16),
+      borderColor: rgba(brand.white, 0.3),
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${brand.cyan}`,
+      outlineOffset: 2,
+    },
+    '& svg': { width: 16, height: 16, color: brand.cyanLight },
   },
-  content: { maxWidth: 1260, margin: '0 auto', padding: '0 40px 56px' },
-  stats: { marginTop: -36, position: 'relative', zIndex: 1 },
+  content: {
+    maxWidth: 1200,
+    margin: '0 auto',
+    padding: '0 32px 40px',
+    [theme.breakpoints.down('sm')]: { padding: '0 20px 32px' },
+  },
+  // The counted figures ride up over the hero's bottom edge so the banner
+  // and the page below read as one composition rather than two stacked blocks.
+  stats: {
+    marginTop: -36,
+    position: 'relative',
+    zIndex: 1,
+    animation: '$rise 320ms cubic-bezier(0.2, 0.7, 0.2, 1) 120ms both',
+  },
+  '@keyframes rise': {
+    from: { opacity: 0, transform: 'translateY(10px)' },
+    to: { opacity: 1, transform: 'none' },
+  },
+  panels: { display: 'grid', gap: 16 },
   star: { color: theme.palette.gold },
 }));
 
@@ -107,37 +139,23 @@ const timeOfDay = () => {
   return 'evening';
 };
 
-const STATS: Array<{
-  kind: string;
-  label: string;
-  icon: ReactNode;
-  to: string;
-}> = [
-  {
-    kind: 'component',
-    label: 'Components',
-    icon: <WidgetsRoundedIcon />,
-    to: '/catalog?filters[kind]=component',
-  },
-  {
-    kind: 'api',
-    label: 'APIs',
-    icon: <ExtensionRoundedIcon />,
-    to: '/catalog?filters[kind]=api',
-  },
-  {
-    kind: 'system',
-    label: 'Systems',
-    icon: <LayersRoundedIcon />,
-    to: '/catalog?filters[kind]=system',
-  },
-  {
-    kind: 'template',
-    label: 'Templates',
-    icon: <CodeRoundedIcon />,
-    to: '/create',
-  },
-];
+const isMac =
+  typeof navigator !== 'undefined' &&
+  /Mac|iPhone|iPad/.test(navigator.platform);
+
+/** How long ago, in the coarsest unit that is still honest. */
+function ago(timestamp: number): string {
+  const s = Math.max(1, Math.round((Date.now() - timestamp) / 1000));
+  if (s < 60) return 'just now';
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} hr${h === 1 ? '' : 's'} ago`;
+  const d = Math.round(h / 24);
+  return d === 1 ? 'yesterday' : `${d} days ago`;
+}
+
+const TECHDOCS_ANNOTATION = 'backstage.io/techdocs-ref';
 
 const ACTIONS: Array<{
   title: string;
@@ -147,42 +165,37 @@ const ACTIONS: Array<{
 }> = [
   {
     title: 'Create from a template',
-    description:
-      'Scaffold a new service on the golden path with CI, observability and ownership wired in.',
+    description: 'Scaffold a service with CI, ownership and alerts wired in.',
     icon: <AddCircleOutlineRoundedIcon />,
     to: '/create',
   },
   {
     title: 'Register a component',
-    description:
-      'Bring an existing repository into the catalogue with a catalog-info.yaml.',
+    description: 'Add an existing repository to the catalogue.',
     icon: <AccountTreeRoundedIcon />,
     to: '/catalog-import',
   },
   {
-    title: 'Technical documentation',
-    description:
-      'Browse TechDocs for every service, API and system in one place.',
+    title: 'Read the docs',
+    description: 'TechDocs for every service, API and system.',
     icon: <DescriptionRoundedIcon />,
     to: '/docs',
   },
   {
-    title: 'Scorecards & tech insights',
-    description:
-      'See how the estate measures up against engineering standards.',
+    title: 'Check scorecards',
+    description: 'How the estate measures up against engineering standards.',
     icon: <AssessmentRoundedIcon />,
     to: '/tech-insights-overview',
   },
   {
-    title: 'Skill marketplace',
-    description:
-      'Discover and install approved AI skills for your team’s tooling.',
+    title: 'Browse skills',
+    description: 'Approved AI skills you can install for your team.',
     icon: <StorefrontRoundedIcon />,
     to: '/skills',
   },
   {
-    title: 'Feature flags',
-    description: 'Manage Unleash feature toggles across environments.',
+    title: 'Manage feature flags',
+    description: 'Unleash toggles across every environment.',
     icon: <FlagRoundedIcon />,
     to: '/unleash',
   },
@@ -193,43 +206,90 @@ const entityHref = (e: Entity) =>
     e.metadata.name
   }`;
 
-const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/** Placeholder rows shown while a panel's contents load. */
+const LoadingRows = ({ count }: { count: number }) => (
+  <>
+    {Array.from({ length: count }, (_, i) => (
+      <ListRow
+        key={i}
+        title={<Skeleton width={`${60 - i * 8}%`} height={14} />}
+        meta={<Skeleton width="30%" height={12} />}
+      />
+    ))}
+  </>
+);
 
 export const LandingPage = () => {
   const classes = useStyles();
-  const navigate = useNavigate();
   const catalogApi = useApi(catalogApiRef);
-  const identityApi = useApi(identityApiRef);
   const { starredEntities } = useStarredEntities();
-  const [query, setQuery] = useState('');
+  const { firstName } = useCurrentUser();
+  const { state: searchState, toggleModal } = useSearchModal();
 
-  const { value: who } = useAsync(
-    async () => ({
-      profile: await identityApi.getProfileInfo(),
-      identity: await identityApi.getBackstageIdentity(),
-    }),
-    [identityApi],
-  );
-  const rawName =
-    who?.profile.displayName?.split(/\s+/)[0] ??
-    (who?.identity.userEntityRef
-      ? parseEntityRef(who.identity.userEntityRef).name
-      : undefined);
-  const firstName = rawName ? capitalise(rawName) : undefined;
-
-  const { value: counts } = useAsync(async () => {
-    const results = await Promise.all(
-      STATS.map(s =>
-        catalogApi
-          .queryEntities({ filter: { kind: s.kind }, limit: 1 })
-          .then(r => r.totalItems)
-          .catch(() => undefined),
-      ),
-    );
-    return Object.fromEntries(STATS.map((s, i) => [s.kind, results[i]]));
+  // Catalogue health rather than raw counts: the two figures that should
+  // move (documented, unowned) sit next to the two that give them scale.
+  const { value: health, loading: healthLoading } = useAsync(async () => {
+    const [components, apis] = await Promise.all([
+      catalogApi.queryEntities({
+        filter: { kind: 'component' },
+        fields: ['metadata.name', 'metadata.annotations', 'spec.owner'],
+        limit: 1000,
+      }),
+      catalogApi
+        .queryEntities({ filter: { kind: 'api' }, limit: 1 })
+        .then(r => r.totalItems)
+        .catch(() => undefined),
+    ]);
+    const total = components.totalItems;
+    const items = components.items;
+    const documented = items.filter(
+      e => e.metadata.annotations?.[TECHDOCS_ANNOTATION],
+    ).length;
+    const unowned = items.filter(e => !e.spec?.owner).length;
+    return {
+      components: total,
+      apis,
+      documentedPct: items.length ? Math.round((documented / items.length) * 100) : 0,
+      documented,
+      unowned,
+    };
   }, [catalogApi]);
 
-  const { value: recent } = useAsync(
+  // Recently viewed comes from plugin-home's visits API, which records every
+  // route change. Only entity visits are shown — a person is looking for the
+  // service they were just on, not the tab they had open — and each entity
+  // appears once, at its most recent visit, linking to its overview.
+  const visitsApi = useApiHolder().get(visitsApiRef);
+  const { value: visits } = useAsync(
+    () =>
+      visitsApi
+        ? visitsApi
+            .list({
+              limit: 40,
+              orderBy: [{ field: 'timestamp', direction: 'desc' }],
+            })
+            .then(all => {
+              const seen = new Set<string>();
+              const out: Visit[] = [];
+              for (const v of all) {
+                if (!v.entityRef || seen.has(v.entityRef)) continue;
+                seen.add(v.entityRef);
+                const { kind, namespace, name } = parseEntityRef(v.entityRef);
+                out.push({
+                  ...v,
+                  name,
+                  pathname: `/catalog/${namespace}/${kind}/${name}`,
+                });
+                if (out.length === 5) break;
+              }
+              return out;
+            })
+            .catch(() => [] as Visit[])
+        : Promise.resolve([] as Visit[]),
+    [visitsApi],
+  );
+
+  const { value: recent, loading: recentLoading } = useAsync(
     () =>
       catalogApi
         .queryEntities({
@@ -242,34 +302,27 @@ export const LandingPage = () => {
     [catalogApi],
   );
 
-  const onSearch = (e: FormEvent) => {
-    e.preventDefault();
-    const q = query.trim();
-    navigate(q ? `/search?query=${encodeURIComponent(q)}` : '/search');
-  };
-
   const starred = [...starredEntities].slice(0, 6);
 
   return (
     <div className={classes.root}>
       <HeroBanner
-        eyebrow="CustomerX Developer Platform"
+        eyebrow="Accelerate · Developer Platform"
         title={`Good ${timeOfDay()}${firstName ? `, ${firstName}` : ''}.`}
-        subtitle="Find any service, API or team. Ship on the golden path. Keep the estate healthy — everything engineering needs, in one place."
+        subtitle="Find any service, API or team, and ship on the golden path."
       >
-        <form role="search" onSubmit={onSearch} className={classes.search}>
+        <button
+          type="button"
+          onClick={toggleModal}
+          className={classes.search}
+          aria-label="Search the platform"
+        >
           <SearchRoundedIcon />
-          <input
-            className={classes.searchInput}
-            placeholder="Search services, APIs, docs and teams…"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            aria-label="Search the platform"
-          />
-          <button type="submit" className={classes.searchButton}>
-            Search
-          </button>
-        </form>
+          <span className={classes.searchLabel}>
+            Search services, APIs, docs and teams
+          </span>
+          <kbd className={classes.kbd}>{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+        </button>
         <div className={classes.chips}>
           <Link to="/create" underline="none" className={classes.chip}>
             <AddCircleOutlineRoundedIcon /> New service
@@ -284,20 +337,58 @@ export const LandingPage = () => {
             <DescriptionRoundedIcon /> Read the docs
           </Link>
         </div>
+        <CustomerXSearchModal {...searchState} toggleModal={toggleModal} />
       </HeroBanner>
 
       <div className={classes.content}>
         <Grid container spacing={2} className={classes.stats}>
-          {STATS.map(s => (
-            <Grid item xs={12} sm={6} md={3} key={s.kind}>
-              <StatTile
-                label={s.label}
-                value={counts?.[s.kind] ?? '—'}
-                icon={s.icon}
-                to={s.to}
-              />
-            </Grid>
-          ))}
+          <Grid item xs={12} sm={6} md={3}>
+            <StatTile
+              label="Components"
+              value={healthLoading ? undefined : (health?.components ?? '—')}
+              icon={<WidgetsRoundedIcon />}
+              to="/catalog?filters[kind]=component"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatTile
+              label="APIs"
+              value={healthLoading ? undefined : (health?.apis ?? '—')}
+              icon={<ExtensionRoundedIcon />}
+              to="/catalog?filters[kind]=api"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatTile
+              label="Documented"
+              value={
+                healthLoading ? undefined : `${health?.documentedPct ?? 0}%`
+              }
+              hint={
+                health
+                  ? `${health.documented} of ${health.components} components have TechDocs`
+                  : undefined
+              }
+              icon={<DescriptionRoundedIcon />}
+              to="/docs"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatTile
+              label="Unowned"
+              value={healthLoading ? undefined : (health?.unowned ?? '—')}
+              hint={
+                health
+                  ? health.unowned === 0
+                    ? 'Every component has an owner'
+                    : 'Components with no owner set'
+                  : undefined
+              }
+              tone={health && health.unowned > 0 ? 'warning' : 'default'}
+              icon={<PersonOffRoundedIcon />}
+              to="/catalog?filters[kind]=component"
+            />
+          </Grid>
         </Grid>
 
         <Grid container spacing={3}>
@@ -315,58 +406,86 @@ export const LandingPage = () => {
           <Grid item xs={12} md={4}>
             <SectionHeading>Your workspace</SectionHeading>
 
-            <PanelCard
-              title="Starred"
-              icon={<StarRoundedIcon className={classes.star} />}
-              action={<Link to="/catalog">Catalogue</Link>}
-              emptyMessage={
-                starred.length === 0
-                  ? 'Star the services and teams you work with and they’ll appear here for one-click access.'
-                  : undefined
-              }
-            >
-              {starred.map(ref => (
-                <ListRow
-                  key={ref}
-                  title={<EntityRefLink entityRef={ref} />}
-                  meta={parseEntityRef(ref).kind}
-                />
-              ))}
-            </PanelCard>
+            <div className={classes.panels}>
+              {visits && visits.length > 0 && (
+                <PanelCard
+                  title="Recently viewed"
+                  icon={<HistoryRoundedIcon color="action" />}
+                >
+                  {visits.map(v => (
+                    <ListRow
+                      key={v.id}
+                      title={<Link to={v.pathname}>{v.name}</Link>}
+                      meta={ago(v.timestamp)}
+                      trailing={
+                        v.entityRef ? (
+                          <Pill tone="neutral">
+                            {parseEntityRef(v.entityRef).kind}
+                          </Pill>
+                        ) : undefined
+                      }
+                    />
+                  ))}
+                </PanelCard>
+              )}
 
-            <div style={{ height: 16 }} />
+              <PanelCard
+                title="Starred"
+                icon={<StarRoundedIcon className={classes.star} />}
+                action={<Link to="/catalog">Catalogue</Link>}
+                emptyMessage={
+                  starred.length === 0
+                    ? 'Star the services and teams you work with to keep them here.'
+                    : undefined
+                }
+              >
+                {starred.map(ref => (
+                  <ListRow
+                    key={ref}
+                    title={<EntityRefLink entityRef={ref} />}
+                    meta={parseEntityRef(ref).kind}
+                  />
+                ))}
+              </PanelCard>
 
-            <PanelCard
-              title="Components"
-              action={<Link to="/catalog">View all</Link>}
-              emptyMessage={
-                !recent || recent.length === 0 ? (
-                  <>
-                    No components registered yet.{' '}
-                    <Link to="/catalog-import">Register the first one</Link>.
-                  </>
-                ) : undefined
-              }
-            >
-              {recent?.map(e => (
-                <ListRow
-                  key={entityHref(e)}
-                  title={
-                    <Link to={entityHref(e)}>
-                      {e.metadata.title ?? e.metadata.name}
-                    </Link>
-                  }
-                  meta={`${String(e.spec?.owner ?? 'unowned')}${
-                    e.spec?.lifecycle ? ` · ${String(e.spec.lifecycle)}` : ''
-                  }`}
-                  trailing={
-                    e.spec?.type ? (
-                      <Pill>{String(e.spec.type)}</Pill>
-                    ) : undefined
-                  }
-                />
-              ))}
-            </PanelCard>
+              <PanelCard
+                title="Components"
+                action={<Link to="/catalog">View all</Link>}
+                emptyMessage={
+                  !recentLoading && (!recent || recent.length === 0) ? (
+                    <>
+                      No components registered yet.{' '}
+                      <Link to="/catalog-import">Register the first one</Link>.
+                    </>
+                  ) : undefined
+                }
+              >
+                {recentLoading ? (
+                  <LoadingRows count={4} />
+                ) : (
+                  recent?.map(e => (
+                    <ListRow
+                      key={entityHref(e)}
+                      title={
+                        <Link to={entityHref(e)}>
+                          {e.metadata.title ?? e.metadata.name}
+                        </Link>
+                      }
+                      meta={`${String(e.spec?.owner ?? 'unowned')}${
+                        e.spec?.lifecycle
+                          ? ` · ${String(e.spec.lifecycle)}`
+                          : ''
+                      }`}
+                      trailing={
+                        e.spec?.type ? (
+                          <Pill>{String(e.spec.type)}</Pill>
+                        ) : undefined
+                      }
+                    />
+                  ))
+                )}
+              </PanelCard>
+            </div>
           </Grid>
         </Grid>
       </div>

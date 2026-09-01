@@ -41,4 +41,32 @@ describe('createCustomerXTheme', () => {
     expect(globals[sel]['--bui-accent-bg']).toBe(dark.primary.main);
     expect(globals[sel]['--bui-bg-app']).toBe(dark.n.bg);
   });
+
+  // The MUI palette, the @backstage/ui variables and the `Pill` primitive all
+  // read `ModeTokens.tint`. Assert they still agree, so a colour can't be
+  // "fixed" in one of the three and silently drift in the others.
+  it.each([
+    ['light', light],
+    ['dark', dark],
+  ])('drives palette and @backstage/ui from one tint set in %s', (_n, mode) => {
+    const v4 = createCustomerXTheme(mode).getTheme('v4') as any;
+    const sel = `[data-theme-name='customer-x'][data-theme-mode='${mode.mode}']`;
+    const bui = v4.overrides.MuiCssBaseline['@global'][sel];
+
+    for (const [tone, bg, fg] of [
+      ['error', 'errorBackground', 'errorText'],
+      ['warning', 'warningBackground', 'warningText'],
+      ['info', 'infoBackground', 'infoText'],
+    ] as const) {
+      expect(v4.palette[bg]).toBe(mode.tint[tone].bg);
+      expect(v4.palette[fg]).toBe(mode.tint[tone].fg);
+    }
+
+    expect(bui['--bui-negative-bg-subdued']).toBe(mode.tint.error.bg);
+    expect(bui['--bui-positive-bg-subdued']).toBe(mode.tint.ok.bg);
+    expect(bui['--bui-warning-fg-subdued']).toBe(mode.tint.warning.fg);
+    // The deprecated solid ramp must stay an alias of the accent ramp.
+    // eslint-disable-next-line @backstage/no-deprecated-bui-tokens
+    expect(bui['--bui-bg-solid']).toBe('var(--bui-accent-bg)');
+  });
 });

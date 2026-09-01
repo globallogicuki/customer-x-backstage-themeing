@@ -1,5 +1,5 @@
 app:
-  title: CustomerX Developer Platform
+  title: Accelerate
   baseUrl: http://localhost:3000
 
   # Enable all packages by default, this will discover packages from packages/app/package.json
@@ -10,7 +10,7 @@ app:
   support:
     url: https://intranet.customer-x.example/developer-platform/support
     items:
-      - title: Developer Platform support
+      - title: Accelerate support
         icon: chat
         links:
           - url: https://intranet.customer-x.example/developer-platform/support
@@ -22,6 +22,11 @@ app:
     # The bespoke CustomerX landing page (page:customer-x/landing) is mounted at
     # `/`; the catalog stays at /catalog. The stock home page is disabled.
     - page:home: false
+    # …but its visits tracking stays on: the landing page's "Recently viewed"
+    # panel reads the visits API, and the listener records a visit on every
+    # route change. Both ship disabled in @backstage/plugin-home.
+    - api:home/visits: true
+    - app-root-element:home/visit-listener: true
 
     # The tech-insights plugin is installed for its API, but its own entity
     # card and tab are replaced by tech-insights-overview's scorecard views.
@@ -29,7 +34,7 @@ app:
     - entity-content:tech-insights/scorecards-content: false
 
 organization:
-  name: CustomerX
+  name: Accelerate
 
 backend:
   # Used for enabling authentication, secret is shared by all backend plugins
@@ -151,7 +156,9 @@ proxy:
 techdocs:
   builder: 'local' # Alternatives - 'external'
   generator:
-    runIn: 'docker' # Alternatives - 'local'
+    # Local so the example docs build without Docker: needs `mkdocs` with the
+    # `mkdocs-techdocs-core` plugin on PATH (e.g. `uv tool install mkdocs --with mkdocs-techdocs-core`).
+    runIn: 'local'
   publisher:
     type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
 

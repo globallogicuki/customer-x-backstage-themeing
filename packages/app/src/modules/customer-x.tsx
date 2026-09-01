@@ -14,6 +14,7 @@ import {
 import {
   CustomerXSidebar,
   CustomerXThemeProvider,
+  techDocsThemeModule,
 } from '@globallogicuki/backstage-theme-customer-x';
 import Brightness2Icon from '@material-ui/icons/Brightness2';
 import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
@@ -36,7 +37,9 @@ const theme = (name: 'light' | 'dark', title: string, icon: JSX.Element) =>
         variant: name,
         icon,
         Provider: ({ children }) => (
-          <CustomerXThemeProvider mode={name}>{children}</CustomerXThemeProvider>
+          <CustomerXThemeProvider mode={name}>
+            {children}
+          </CustomerXThemeProvider>
         ),
       },
     },
@@ -105,4 +108,6 @@ export const customerXFeatures = [
     routes: { root: landingRouteRef },
     extensions: [landingPage],
   }),
+  // Styles the TechDocs reader (a shadow DOM the MUI theme cannot reach).
+  techDocsThemeModule,
 ];

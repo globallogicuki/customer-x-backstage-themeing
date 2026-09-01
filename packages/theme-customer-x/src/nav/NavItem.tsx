@@ -1,80 +1,100 @@
 import { Link, useSidebarOpenState } from '@backstage/core-components';
-import { makeStyles, Tooltip } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { cx } from './cx';
+import { cx } from '../cx';
+import { tokensFor } from '../theme/modes';
+import { brand, font, radius } from '../tokens';
+import { RailTooltip } from './RailTooltip';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    height: 40,
-    margin: '2px 12px',
-    padding: '0 12px',
-    borderRadius: 10,
-    color: theme.palette.navigation.color,
-    textDecoration: 'none',
-    fontSize: 14,
-    fontWeight: 500,
-    lineHeight: 1,
-    whiteSpace: 'nowrap',
-    transition: 'background-color 120ms ease, color 120ms ease',
-    '&:hover': {
-      backgroundColor:
-        theme.palette.navigation.navItem?.hoverBackground ??
-        'rgba(255,255,255,0.08)',
-      color: theme.palette.navigation.selectedColor,
+const useStyles = makeStyles(theme => {
+  const { nav } = tokensFor(theme);
+  return {
+    root: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      height: 36,
+      margin: '2px 8px',
+      padding: '0 8px',
+      borderRadius: radius.md,
+      color: nav.color,
+      textDecoration: 'none',
+      fontSize: font.md,
+      fontWeight: 500,
+      lineHeight: 1,
+      whiteSpace: 'nowrap',
+      transition: 'background-color 120ms ease, color 120ms ease',
+      '&:hover': {
+        backgroundColor: nav.hover,
+        color: nav.selectedColor,
+      },
+      '&:focus-visible': {
+        outline: `2px solid ${theme.palette.navigation.indicator}`,
+        outlineOffset: -2,
+      },
     },
-    '&:focus-visible': {
-      outline: `2px solid ${theme.palette.navigation.indicator}`,
-      outlineOffset: -2,
+    // One signal for "you are here": the row fills. No accent bar as well —
+    // two markers for one state is the reader doing the theme's work.
+    active: {
+      backgroundColor: nav.selectedBackground,
+      color: nav.selectedColor,
+      fontWeight: 600,
+      '&:hover': {
+        backgroundColor: nav.selectedBackgroundHover,
+        color: nav.selectedColor,
+      },
     },
-  },
-  active: {
-    backgroundColor: 'rgba(0, 174, 239, 0.18)',
-    color: theme.palette.navigation.selectedColor,
-    fontWeight: 600,
-    '&:hover': {
-      backgroundColor: 'rgba(0, 174, 239, 0.22)',
+    closed: {
+      width: 40,
+      padding: 0,
+      justifyContent: 'center',
     },
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      left: -12,
-      top: 9,
-      bottom: 9,
-      width: 3,
-      borderRadius: '0 3px 3px 0',
-      background: theme.palette.navigation.indicator,
+    icon: {
+      display: 'inline-flex',
+      flexShrink: 0,
+      '& svg': {
+        width: 20,
+        height: 20,
+        fontSize: 20,
+      },
     },
-  },
-  closed: {
-    width: 48,
-    padding: 0,
-    justifyContent: 'center',
-  },
-  icon: {
-    display: 'inline-flex',
-    flexShrink: 0,
-    '& svg': {
-      width: 20,
+    label: {
+      flex: 1,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+    trailing: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      marginLeft: 'auto',
+    },
+    count: {
+      minWidth: 20,
       height: 20,
-      fontSize: 20,
+      padding: '0 6px',
+      borderRadius: radius.pill,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: font.xs,
+      fontWeight: 600,
+      background: theme.palette.navigation.indicator,
+      color: brand.navy,
     },
-  },
-  label: {
-    flex: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  trailing: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    marginLeft: 'auto',
-  },
-}));
+    dot: {
+      position: 'absolute',
+      top: 8,
+      right: 10,
+      width: 8,
+      height: 8,
+      borderRadius: '50%',
+      background: theme.palette.navigation.indicator,
+      boxShadow: `0 0 0 2px ${nav.background}`,
+    },
+  };
+});
 
 export interface NavItemProps {
   to: string;
@@ -84,6 +104,8 @@ export interface NavItemProps {
   exact?: boolean;
   /** Optional trailing adornment, e.g. a badge. */
   trailing?: ReactNode;
+  /** Unread-style count. Shows as a pill when open and a dot when collapsed. */
+  badge?: number;
 }
 
 function isActivePath(pathname: string, to: string, exact?: boolean) {
@@ -94,37 +116,50 @@ function isActivePath(pathname: string, to: string, exact?: boolean) {
 }
 
 /** A single navigation link in the rail. Collapses to an icon with tooltip. */
-export const NavItem = ({ to, title, icon, exact, trailing }: NavItemProps) => {
+export const NavItem = ({
+  to,
+  title,
+  icon,
+  exact,
+  trailing,
+  badge,
+}: NavItemProps) => {
   const classes = useStyles();
   const { isOpen } = useSidebarOpenState();
   const { pathname } = useLocation();
   const active = isActivePath(pathname, to, exact);
 
-  const link = (
-    <Link
-      to={to}
-      underline="none"
-      aria-current={active ? 'page' : undefined}
-      aria-label={isOpen ? undefined : title}
-      className={cx(
-        classes.root,
-        active && classes.active,
-        !isOpen && classes.closed,
-      )}
-    >
-      <span className={classes.icon}>{icon}</span>
-      {isOpen && <span className={classes.label}>{title}</span>}
-      {isOpen && trailing && (
-        <span className={classes.trailing}>{trailing}</span>
-      )}
-    </Link>
-  );
-
-  return isOpen ? (
-    link
-  ) : (
-    <Tooltip title={title} placement="right" enterDelay={300}>
-      {link}
-    </Tooltip>
+  return (
+    <RailTooltip title={title}>
+      <Link
+        to={to}
+        underline="none"
+        aria-current={active ? 'page' : undefined}
+        aria-label={
+          isOpen ? undefined : badge ? `${title} (${badge} unread)` : title
+        }
+        className={cx(
+          classes.root,
+          active && classes.active,
+          !isOpen && classes.closed,
+        )}
+      >
+        <span className={classes.icon}>{icon}</span>
+        {isOpen && <span className={classes.label}>{title}</span>}
+        {isOpen && Boolean(trailing || badge) && (
+          <span className={classes.trailing}>
+            {trailing}
+            {badge ? (
+              <span className={classes.count} aria-label={`${badge} unread`}>
+                {badge > 99 ? '99+' : badge}
+              </span>
+            ) : null}
+          </span>
+        )}
+        {!isOpen && badge ? (
+          <span className={classes.dot} aria-hidden="true" />
+        ) : null}
+      </Link>
+    </RailTooltip>
   );
 };

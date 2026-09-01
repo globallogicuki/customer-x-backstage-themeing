@@ -1,7 +1,10 @@
 import { UnifiedThemeProvider } from '@backstage/theme';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ReactNode } from 'react';
-import { customerXDarkTheme, customerXLightTheme } from './createCustomerXTheme';
+import {
+  customerXDarkTheme,
+  customerXLightTheme,
+} from './createCustomerXTheme';
 import { CUSTOMER_X_THEME_NAME, type Mode } from './modes';
 
 export interface CustomerXThemeProviderProps {

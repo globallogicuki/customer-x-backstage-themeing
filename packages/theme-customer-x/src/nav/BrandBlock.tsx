@@ -1,18 +1,19 @@
 import { Link, useSidebarOpenState } from '@backstage/core-components';
 import { makeStyles } from '@material-ui/core';
 import { CustomerXLogo, CustomerXMark } from '../brand';
-import { cx } from './cx';
+import { cx } from '../cx';
+import { tokensFor } from '../theme/modes';
 
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     alignItems: 'center',
-    height: 72,
+    minHeight: 64,
     width: '100%',
-    padding: '0 22px',
+    padding: '14px 16px',
     boxSizing: 'border-box',
     textDecoration: 'none',
-    color: '#FFFFFF',
+    color: tokensFor(theme).nav.selectedColor,
     '&:focus-visible': {
       outline: `2px solid ${theme.palette.navigation.indicator}`,
       outlineOffset: -6,
@@ -34,13 +35,13 @@ export const BrandBlock = () => {
     <Link
       to="/"
       underline="none"
-      aria-label="CustomerX Developer Platform — home"
+      aria-label="Accelerate — home"
       className={cx(classes.root, !isOpen && classes.closed)}
     >
       {isOpen ? (
-        <CustomerXLogo size={30} tagline="Developer Platform" />
+        <CustomerXLogo size={28} tagline="Developer Platform" />
       ) : (
-        <CustomerXMark size={30} />
+        <CustomerXMark size={28} />
       )}
     </Link>
   );

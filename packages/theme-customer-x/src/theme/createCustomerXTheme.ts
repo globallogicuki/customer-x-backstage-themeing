@@ -3,7 +3,7 @@ import {
   defaultComponentThemes,
   type UnifiedTheme,
 } from '@backstage/theme';
-import { fontFamily, radius } from '../tokens';
+import { radius } from '../tokens';
 import { createBackstageComponents } from './components/backstage';
 import { createMuiComponents } from './components/mui';
 import { dark, light, type ModeTokens } from './modes';
@@ -17,12 +17,12 @@ export function createCustomerXTheme(t: ModeTokens): UnifiedTheme {
     palette: createPalette(t),
     defaultPageTheme: 'home',
     pageTheme: createPageThemes(t),
-    fontFamily,
-    htmlFontSize: 16,
+    // Carries `fontFamily` and `htmlFontSize`; the same-named top-level
+    // options are ignored once `typography` is supplied.
     typography,
     components: {
-      // Keep Backstage's sensible defaults for anything not touched below.
-      ...defaultComponentThemes,
+      // createUnifiedTheme merges `defaultComponentThemes` under these, so
+      // anything not touched below keeps Backstage's sensible default.
       ...createMuiComponents(t, defaultComponentThemes),
       ...createBackstageComponents(t),
     },

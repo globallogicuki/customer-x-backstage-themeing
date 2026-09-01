@@ -1,5 +1,7 @@
 import { makeStyles } from '@material-ui/core';
 import { ReactNode } from 'react';
+import { tokensFor } from '../theme/modes';
+import { font } from '../tokens';
 import { SurfaceCard } from './SurfaceCard';
 
 const useStyles = makeStyles(theme => ({
@@ -8,10 +10,11 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    padding: '16px 20px 12px',
+    padding: '12px 16px',
     borderBottom: `1px solid ${theme.palette.divider}`,
-    fontSize: 15,
+    fontSize: font.md,
     fontWeight: 600,
+    color: tokensFor(theme).heading,
   },
   title: {
     display: 'inline-flex',
@@ -19,11 +22,11 @@ const useStyles = makeStyles(theme => ({
     gap: 8,
     '& svg': { width: 20, height: 20 },
   },
-  action: { fontSize: 13, fontWeight: 500 },
-  body: { padding: '6px 0' },
+  action: { fontSize: font.base, fontWeight: 500 },
+  body: { padding: '4px 0' },
   empty: {
-    padding: '24px 20px',
-    fontSize: 13.5,
+    padding: '20px 16px',
+    fontSize: font.base,
     lineHeight: 1.55,
     color: theme.palette.text.secondary,
   },

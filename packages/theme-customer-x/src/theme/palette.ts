@@ -3,7 +3,7 @@ import { brand } from '../tokens';
 import type { ModeTokens } from './modes';
 
 export function createPalette(t: ModeTokens): UnifiedThemeOptions['palette'] {
-  const { n, status } = t;
+  const { n, status, tint } = t;
   const isDark = t.mode === 'dark';
   return {
     mode: t.mode,
@@ -21,9 +21,7 @@ export function createPalette(t: ModeTokens): UnifiedThemeOptions['palette'] {
       hover: t.hoverOverlay,
       selected: t.selectedOverlay,
       focus: t.selectedOverlay,
-      disabledBackground: isDark
-        ? 'rgba(255,255,255,0.08)'
-        : 'rgba(11,31,51,0.08)',
+      disabledBackground: t.disabled.overlay,
     },
     error: { main: status.error },
     warning: { main: status.warning },
@@ -35,12 +33,12 @@ export function createPalette(t: ModeTokens): UnifiedThemeOptions['palette'] {
     textSubtle: n.textSecondary,
     textVerySubtle: n.textVerySubtle,
     highlight: isDark ? 'rgba(250, 197, 21, 0.18)' : '#FFF8D6',
-    errorBackground: isDark ? 'rgba(249, 112, 102, 0.14)' : '#FEF3F2',
-    warningBackground: isDark ? 'rgba(253, 176, 34, 0.16)' : '#FFF6E5',
-    infoBackground: isDark ? 'rgba(0, 174, 239, 0.14)' : brand.sky,
-    errorText: isDark ? '#FDA29B' : '#B42318',
-    infoText: isDark ? '#8FDDF9' : brand.navy,
-    warningText: isDark ? '#FEC84B' : '#7A2E0E',
+    errorBackground: tint.error.bg,
+    warningBackground: tint.warning.bg,
+    infoBackground: tint.info.bg,
+    errorText: tint.error.fg,
+    infoText: tint.info.fg,
+    warningText: tint.warning.fg,
     link: t.link,
     linkHover: t.linkHover,
     gold: '#F5C400',

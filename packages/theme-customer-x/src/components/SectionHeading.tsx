@@ -1,20 +1,24 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import { ReactNode } from 'react';
+import { cx } from '../cx';
+import { tokensFor } from '../theme/modes';
+import { font } from '../tokens';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     alignItems: 'baseline',
     justifyContent: 'space-between',
     gap: 12,
-    margin: '40px 0 16px',
+    margin: '32px 0 12px',
   },
   title: {
-    fontSize: 18,
+    fontSize: font.lg,
     fontWeight: 600,
     letterSpacing: '-0.01em',
+    color: tokensFor(theme).heading,
   },
-});
+}));
 
 export interface SectionHeadingProps {
   children: ReactNode;
@@ -31,7 +35,7 @@ export const SectionHeading = ({
 }: SectionHeadingProps) => {
   const classes = useStyles();
   return (
-    <div className={[classes.root, className].filter(Boolean).join(' ')}>
+    <div className={cx(classes.root, className)}>
       <Typography component="h2" className={classes.title}>
         {children}
       </Typography>

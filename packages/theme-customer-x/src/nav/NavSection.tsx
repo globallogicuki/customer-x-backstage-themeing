@@ -1,23 +1,23 @@
 import { useSidebarOpenState } from '@backstage/core-components';
 import { makeStyles } from '@material-ui/core';
 import { ReactNode } from 'react';
+import { tokensFor } from '../theme/modes';
+import { font } from '../tokens';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   label: {
-    padding: '18px 24px 6px',
-    fontSize: 10.5,
-    fontWeight: 700,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.42)',
+    padding: '16px 16px 4px',
+    fontSize: font.sm,
+    fontWeight: 500,
+    color: tokensFor(theme).nav.label,
     whiteSpace: 'nowrap',
   },
   rule: {
     height: 1,
-    margin: '12px 20px',
-    background: 'rgba(255,255,255,0.10)',
+    margin: '12px 16px',
+    background: tokensFor(theme).nav.divider,
   },
-});
+}));
 
 export interface NavSectionProps {
   label: string;

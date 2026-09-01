@@ -29,6 +29,7 @@ kind: Component
 metadata:
   name: example-service
   annotations:
+    backstage.io/techdocs-ref: dir:./techdocs/example-service
     terraform/organization: orgName
     terraform/workspaces: workspaceName1,workspaceName2,workspaceName3
     unleash.io/project-id: pocproject
@@ -58,3 +59,20 @@ spec:
     message ExampleMessage {
       string example = 1;
     };
+---
+# The portal's own design guide, published as TechDocs so it is versioned with
+# the theme that implements it.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: accelerate-design-guide
+  title: Accelerate design guide
+  description: How Accelerate looks, speaks and is built — colour, type, components and voice.
+  tags: [design, documentation]
+  annotations:
+    backstage.io/techdocs-ref: dir:./techdocs/design-guide
+spec:
+  type: documentation
+  lifecycle: production
+  owner: guests
+  system: examples

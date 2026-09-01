@@ -2,43 +2,52 @@ import { Link } from '@backstage/core-components';
 import { makeStyles } from '@material-ui/core';
 import ArrowForwardRoundedIcon from '@material-ui/icons/ArrowForwardRounded';
 import { ReactNode } from 'react';
+import { tokensFor } from '../theme/modes';
+import { font, radius } from '../tokens';
 import { SurfaceCard } from './SurfaceCard';
 
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: 10,
-    padding: '20px 20px 18px',
+    alignItems: 'flex-start',
+    gap: 12,
+    padding: 16,
     height: '100%',
-    '&:hover $arrow': { transform: 'translateX(2px)', opacity: 1 },
-  },
-  head: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    '&:hover $arrow': { opacity: 1, color: theme.palette.secondary.main },
   },
   icon: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
+    width: 32,
+    height: 32,
+    borderRadius: radius.md,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: theme.palette.background.default,
-    color: theme.palette.primary.main,
-    '& svg': { width: 20, height: 20 },
+    flexShrink: 0,
+    background: tokensFor(theme).accentWash,
+    color: tokensFor(theme).accentText,
+    '& svg': { width: 18, height: 18 },
+  },
+  main: { minWidth: 0, flex: 1 },
+  title: {
+    display: 'block',
+    fontSize: font.md,
+    fontWeight: 500,
+    color: tokensFor(theme).heading,
+  },
+  description: {
+    display: 'block',
+    fontSize: font.base,
+    lineHeight: 1.5,
+    marginTop: 4,
+    color: theme.palette.text.secondary,
   },
   arrow: {
-    color: theme.palette.text.secondary,
-    opacity: 0.5,
-    transition: 'transform 120ms ease, opacity 120ms ease',
-  },
-  title: { fontSize: 15, fontWeight: 600 },
-  description: {
-    fontSize: 13,
-    lineHeight: 1.5,
-    color: theme.palette.text.secondary,
+    flexShrink: 0,
+    marginTop: 2,
+    color: theme.palette.text.disabled,
+    opacity: 0,
+    transition: 'opacity 120ms ease',
+    '& svg': { width: 18, height: 18 },
   },
 }));
 
@@ -49,7 +58,12 @@ export interface ActionCardProps {
   to: string;
 }
 
-/** A clickable "do this next" card with an icon, title, blurb and arrow. */
+/**
+ * A "do this next" card: icon, title, one line of detail.
+ *
+ * The arrow only appears on hover — at rest the row is text, which lets a
+ * grid of these read as a list of things to do rather than a wall of buttons.
+ */
 export const ActionCard = ({
   title,
   description,
@@ -66,14 +80,18 @@ export const ActionCard = ({
       accentHover
       className={classes.root}
     >
-      <div className={classes.head}>
-        <span className={classes.icon} aria-hidden="true">
-          {icon}
-        </span>
-        <ArrowForwardRoundedIcon className={classes.arrow} />
-      </div>
-      <div className={classes.title}>{title}</div>
-      {description && <div className={classes.description}>{description}</div>}
+      <span className={classes.icon} aria-hidden="true">
+        {icon}
+      </span>
+      <span className={classes.main}>
+        <span className={classes.title}>{title}</span>
+        {description && (
+          <span className={classes.description}>{description}</span>
+        )}
+      </span>
+      <span className={classes.arrow} aria-hidden="true">
+        <ArrowForwardRoundedIcon />
+      </span>
     </SurfaceCard>
   );
 };

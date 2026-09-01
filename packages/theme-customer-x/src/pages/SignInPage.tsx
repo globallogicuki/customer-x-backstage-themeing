@@ -1,10 +1,11 @@
 import { ProxiedSignInPage } from '@backstage/core-components';
 import type { SignInPageProps } from '@backstage/core-plugin-api';
 import { Button, makeStyles, Typography } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import { useState } from 'react';
-import { CustomerXLogo } from '../brand';
-import { brand } from '../tokens';
+import { CustomerXLogo, CustomerXMark } from '../brand';
+import { SurfaceCard } from '../components';
+import { tokensFor } from '../theme/modes';
+import { brand, font, rgba } from '../tokens';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -13,6 +14,9 @@ const useStyles = makeStyles(theme => ({
     gridTemplateColumns: 'minmax(0, 5fr) minmax(0, 6fr)',
     [theme.breakpoints.down('sm')]: { gridTemplateColumns: '1fr' },
   },
+  // The one brand moment in the product. It is flat navy — the depth comes
+  // from the mark itself, drawn far larger than life and cropped by the
+  // panel, rather than from a gradient that could belong to any product.
   brand: {
     position: 'relative',
     overflow: 'hidden',
@@ -20,67 +24,37 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    color: '#FFFFFF',
-    background:
-      'linear-gradient(160deg, #00395D 0%, #002B47 55%, #001F33 100%)',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      right: -220,
-      bottom: -260,
-      width: 680,
-      height: 680,
-      borderRadius: '50%',
-      background: `radial-gradient(closest-side, ${brand.cyan}80, ${brand.cyan}00 70%)`,
-      pointerEvents: 'none',
-    },
-    [theme.breakpoints.down('sm')]: { padding: '32px 28px', minHeight: 320 },
+    color: brand.white,
+    backgroundColor: brand.navy,
+    [theme.breakpoints.down('sm')]: { padding: '32px 24px', minHeight: 280 },
+  },
+  watermark: {
+    position: 'absolute',
+    right: '-14%',
+    bottom: '-22%',
+    opacity: 0.08,
+    pointerEvents: 'none',
+    userSelect: 'none',
   },
   brandTop: { position: 'relative' },
-  brandBody: { position: 'relative', maxWidth: 520 },
+  brandBody: { position: 'relative', maxWidth: 480 },
   headline: {
-    fontSize: 40,
-    fontWeight: 700,
-    letterSpacing: '-0.025em',
-    lineHeight: 1.1,
-    marginBottom: 18,
-    [theme.breakpoints.down('sm')]: { fontSize: 30 },
+    fontSize: font.display,
+    fontWeight: 600,
+    letterSpacing: '-0.03em',
+    lineHeight: 1.15,
+    marginBottom: 16,
+    [theme.breakpoints.down('sm')]: { fontSize: font.xxl },
   },
   lede: {
-    fontSize: 16,
-    lineHeight: 1.6,
-    color: 'rgba(255,255,255,0.74)',
-    marginBottom: 28,
-  },
-  points: {
-    listStyle: 'none',
-    margin: 0,
-    padding: 0,
-    display: 'grid',
-    gap: 12,
-  },
-  point: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 12,
-    fontSize: 14.5,
-    lineHeight: 1.5,
-    color: 'rgba(255,255,255,0.88)',
-    '& svg': {
-      width: 20,
-      height: 20,
-      padding: 2,
-      borderRadius: '50%',
-      background: `${brand.cyan}40`,
-      color: brand.cyanLight,
-      flexShrink: 0,
-      marginTop: 1,
-    },
+    fontSize: font.lg,
+    lineHeight: 1.55,
+    color: rgba(brand.white, 0.72),
   },
   brandFoot: {
     position: 'relative',
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: font.sm,
+    color: rgba(brand.white, 0.5),
   },
   form: {
     display: 'flex',
@@ -91,37 +65,28 @@ const useStyles = makeStyles(theme => ({
   },
   card: {
     width: '100%',
-    maxWidth: 420,
-    padding: 36,
-    borderRadius: 16,
-    background: theme.palette.background.paper,
-    border: `1px solid ${theme.palette.divider}`,
-    boxShadow: '0 20px 48px rgba(11, 31, 51, 0.08)',
+    maxWidth: 400,
+    padding: 32,
+    boxShadow: tokensFor(theme).shadows.sm,
   },
   cardTitle: {
-    fontSize: 24,
-    fontWeight: 700,
+    fontSize: font.xxl,
+    fontWeight: 600,
     letterSpacing: '-0.02em',
-    marginBottom: 6,
+    marginBottom: 4,
+    color: tokensFor(theme).heading,
   },
   cardSub: {
-    fontSize: 14,
+    fontSize: font.md,
     color: theme.palette.text.secondary,
     lineHeight: 1.55,
-    marginBottom: 28,
+    marginBottom: 24,
   },
-  actions: { display: 'grid', gap: 10 },
-  primary: {
-    height: 46,
-    fontSize: 15,
-  },
-  secondary: {
-    height: 46,
-    fontSize: 15,
-  },
+  actions: { display: 'grid', gap: 8 },
+  action: { height: 44 },
   hint: {
     marginTop: 20,
-    fontSize: 12.5,
+    fontSize: font.sm,
     color: theme.palette.text.secondary,
     lineHeight: 1.5,
   },
@@ -140,38 +105,21 @@ export const CustomerXSignInPage = ({ onSignInSuccess }: SignInPageProps) => {
   return (
     <div className={classes.root}>
       <aside className={classes.brand}>
+        <div className={classes.watermark} aria-hidden="true">
+          <CustomerXMark size={620} color={brand.cyan} />
+        </div>
         <div className={classes.brandTop}>
-          <CustomerXLogo size={34} />
+          <CustomerXLogo size={32} tagline="Developer Platform" />
         </div>
         <div className={classes.brandBody}>
           <Typography component="h1" className={classes.headline}>
-            The home of engineering at CustomerX.
+            Engineering, moving faster.
           </Typography>
           <Typography className={classes.lede}>
-            One platform to discover services, ship on the golden path and keep
-            the estate healthy.
+            Accelerate is the engineering home for CustomerX: every service,
+            API and team in one catalogue, with the templates and scorecards
+            that keep them healthy.
           </Typography>
-          <ul className={classes.points}>
-            <li className={classes.point}>
-              <CheckRoundedIcon />
-              <span>
-                A single catalogue of every service, API, system and team
-              </span>
-            </li>
-            <li className={classes.point}>
-              <CheckRoundedIcon />
-              <span>
-                Templates that bake in security, CI and observability from day
-                one
-              </span>
-            </li>
-            <li className={classes.point}>
-              <CheckRoundedIcon />
-              <span>
-                Scorecards and insights that show where to invest next
-              </span>
-            </li>
-          </ul>
         </div>
         <div className={classes.brandFoot}>
           CustomerX internal · For authorised colleagues only
@@ -179,18 +127,18 @@ export const CustomerXSignInPage = ({ onSignInSuccess }: SignInPageProps) => {
       </aside>
 
       <main className={classes.form}>
-        <div className={classes.card}>
+        <SurfaceCard className={classes.card}>
           <Typography component="h2" className={classes.cardTitle}>
             Sign in
           </Typography>
           <Typography className={classes.cardSub}>
-            Use your CustomerX identity to access the Developer Platform.
+            Use your CustomerX identity to open Accelerate.
           </Typography>
           <div className={classes.actions}>
             <Button
               variant="contained"
               color="primary"
-              className={classes.primary}
+              className={classes.action}
               disabled
               title="Enterprise SSO is not configured in this environment yet"
             >
@@ -199,7 +147,7 @@ export const CustomerXSignInPage = ({ onSignInSuccess }: SignInPageProps) => {
             <Button
               variant="outlined"
               color="primary"
-              className={classes.secondary}
+              className={classes.action}
               disabled={signingIn}
               onClick={() => setSigningIn(true)}
             >
@@ -215,11 +163,11 @@ export const CustomerXSignInPage = ({ onSignInSuccess }: SignInPageProps) => {
             </div>
           )}
           <Typography className={classes.hint}>
-            Guest access is read-mostly and intended for evaluation. SSO becomes
+            Guest access is read-only and intended for evaluation. SSO becomes
             available once an enterprise auth provider is enabled in{' '}
             <code>app-config.yaml</code>.
           </Typography>
-        </div>
+        </SurfaceCard>
       </main>
     </div>
   );

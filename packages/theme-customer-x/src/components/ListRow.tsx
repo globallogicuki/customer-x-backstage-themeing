@@ -1,25 +1,26 @@
 import { makeStyles } from '@material-ui/core';
 import { ReactNode } from 'react';
+import { font } from '../tokens';
 
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
-    padding: '12px 20px',
+    padding: '12px 16px',
     borderTop: `1px solid ${theme.palette.divider}`,
     '&:first-child': { borderTop: 'none' },
   },
   main: { minWidth: 0, flex: 1 },
   title: {
-    fontSize: 14,
-    fontWeight: 600,
+    fontSize: font.md,
+    fontWeight: 500,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
   meta: {
-    fontSize: 12.5,
+    fontSize: font.sm,
     marginTop: 2,
     color: theme.palette.text.secondary,
     whiteSpace: 'nowrap',

@@ -1,0 +1,9 @@
+site_name: example-service
+site_description: Reference documentation for the example service
+nav:
+  - Overview: index.md
+  - Getting started: getting-started.md
+  - API reference: api.md
+  - Runbook: runbook.md
+plugins:
+  - techdocs-core
